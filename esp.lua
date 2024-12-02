@@ -1,5 +1,3 @@
--- esp.lua
---// Variables
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
@@ -38,16 +36,15 @@ local ESP_SETTINGS = {
     CharSize = Vector2.new(4, 6),
     Teamcheck = false,
     WallCheck = false,
-    Enabled = true,
-    EnableExitLocations = true,
-    ShowBox = true,
-    ShowFilledBox = true,
+    Enabled = false,
+    ShowBox = false,
+    ShowFilledBox = false,
     BoxType = "Corner Box Esp",
-    ShowName = true,
-    ShowWeapon = true,
-    ShowHealth = true,
-    ShowDistance = true,
-    ShowSkeletons = true,
+    ShowName = false,
+    ShowWeapon = false,
+    ShowHealth = false,
+    ShowDistance = false,
+    ShowSkeletons = false,
     ShowTracer = false,
     TracerColor = Color3.new(1, 1, 1), 
     TracerThickness = 2,
@@ -926,3 +923,4 @@ end
 RunService.RenderStepped:Connect(updateEsp)
 RunService.RenderStepped:Connect(updateEspExitLocation)
 RunService.RenderStepped:Connect(updateEspNPC)
+return ESP_SETTINGS
