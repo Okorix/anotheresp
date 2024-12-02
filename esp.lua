@@ -34,9 +34,10 @@ local ESP_SETTINGS = {
     HealthHighColor = Color3.new(0, 1, 0),
     HealthLowColor = Color3.new(1, 0, 0),
     CharSize = Vector2.new(4, 6),
+    Enabled = false,
+    IncludeNPCs = false,
     Teamcheck = false,
     WallCheck = false,
-    Enabled = false,
     ShowBox = false,
     ShowFilledBox = false,
     BoxType = "Corner Box Esp",
@@ -265,7 +266,7 @@ local function updateEspNPC()
             local head = character:FindFirstChild("Head")
             local humanoid = character:FindFirstChild("Humanoid")
             local isBehindWall = ESP_SETTINGS.WallCheck and isPlayerBehindWallNPC(character)
-            local shouldShow = not isBehindWall and ESP_SETTINGS.Enabled
+            local shouldShow = not isBehindWall and (ESP_SETTINGS.Enabled and ESP_SETTINGS.IncludeNPCs)
             if rootPart and head and humanoid and shouldShow then
                 local position, onScreen = camera:WorldToViewportPoint(rootPart.Position)
                 if onScreen then
