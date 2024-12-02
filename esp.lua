@@ -1,10 +1,11 @@
+-- esp.lua
+--// Variables
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local cache = {}
 local cacheNPC = {}
-local cacheExitLocations = {}
 local wtsp = camera.WorldToViewportPoint
 
 local bones = {
@@ -124,19 +125,6 @@ local function createEsp(player)
     cache[player]["skeletonlines"] = {}
 end
 
-local function createEspExitLocation(exitLocation)
-    local esp = {
-        titletextyes = create("Text", {
-            Color = Color3.new(0, 1, 0),
-            Outline = true,
-            Center = true,
-            Size = 13,
-            Font = 1,
-        }),
-    }
-
-    cacheExitLocations[exitLocation] = esp
-end
 
 local function createEspNPC(char)
     local esp = {
@@ -287,7 +275,7 @@ local function updateEspNPC()
                     if ESP_SETTINGS.ShowWeapon and ESP_SETTINGS.Enabled then
                         local CurrentWeapon = nil
                         for _,Objectss in pairs(character:GetChildren()) do
-                            if Objectss:FindFirstChild("ItemRoot") then
+                            if Objectss:IsA("RayValue") and Objectss:GetAttribute("Tool") then
                                 CurrentWeapon = Objectss
                                 break
                             end
@@ -580,7 +568,7 @@ local function updateEsp()
                     if ESP_SETTINGS.ShowWeapon and ESP_SETTINGS.Enabled then
                         local CurrentWeapon = nil
                         for _,Objectss in pairs(character:GetChildren()) do
-                            if Objectss:FindFirstChild("ItemRoot") then
+                            if Objectss:IsA("RayValue") and Objectss:GetAttribute("Tool") then
                                 CurrentWeapon = Objectss
                                 break
                             end
@@ -844,25 +832,6 @@ local function updateEsp()
     end
 end
 
-local function updateEspExitLocation()
-    for exitLocation, esp in pairs(cacheExitLocations) do
-        if ESP_SETTINGS.EnableExitLocations then
-            local pos3d = exitLocation.Position
-            local positionOnScreen, onScreen = wtsp(workspace.CurrentCamera, pos3d)
-            if onScreen then
-                esp.titletextyes.Visible = true
-                esp.titletextyes.Text = "Extract"
-                esp.titletextyes.Position = Vector2.new(positionOnScreen.X, positionOnScreen.Y)
-                esp.titletextyes.Color = Color3.new(0, 1, 0)
-            else
-                esp.titletextyes.Visible = false
-            end
-        else
-            esp.titletextyes.Visible = false
-        end
-    end
-end
-
 for _, player in ipairs(Players:GetPlayers()) do
     if player ~= localPlayer then
         createEsp(player)
@@ -879,49 +848,15 @@ Players.PlayerRemoving:Connect(function(player)
     removeEsp(player)
 end)
 
-local AiZones = workspace.AiZones
-local ExitLocations = workspace.NoCollision.ExitLocations
-local function CheckIfIsNpc(Obj)
-    if Obj:FindFirstChild("LookAt") and Obj:FindFirstChild("Alert") then
-        return true
-    end
-    return false
-end
-
-for i,v in pairs(ExitLocations:GetChildren()) do
-    if v:IsA("BasePart") or v:IsA("Part") or v.Name == "Exit" then
-        createEspExitLocation(v)
-    end
-end
-ExitLocations.ChildAdded:Connect(function(v)
-    if v:IsA("BasePart") or v:IsA("Part") or v.Name == "Exit" then
-        createEspExitLocation(v)
-    end
+workspace.NPCs.Hostile.ChildAdded:Connect(function(Child)
+    createEspNPC(Child)
 end)
-ExitLocations.ChildRemoved:Connect(function(v)
-    if v:IsA("BasePart") or v:IsA("Part") or v.Name == "Exit" then
-        if cacheExitLocations[v] then
-            for _, drawingobj in pairs(cacheExitLocations[v]) do
-                drawingobj:Remove()
-            end
-            cacheExitLocations[v] = nil
-        end
-    end
+workspace.NPCs.Hostile.ChildRemoved:Connect(function(Child)
+    removeEspNPC(Child)
 end)
-
-for i,v in pairs(AiZones:GetChildren()) do
-    v.ChildAdded:Connect(function(Child)
-        createEspNPC(Child)
-    end)
-    v.ChildRemoved:Connect(function(Child)
-        removeEspNPC(Child)
-    end)
-    for ii,vv in pairs(v:GetChildren()) do
-        createEspNPC(vv)
-    end
+for _,v in pairs(workspace.NPCs.Hostile:GetChildren()) do
+    createEspNPC(v)
 end
 
-RunService.RenderStepped:Connect(updateEsp)
-RunService.RenderStepped:Connect(updateEspExitLocation)
 RunService.RenderStepped:Connect(updateEspNPC)
-return ESP_SETTINGS
+RunService.RenderStepped:Connect(updateEsp)
