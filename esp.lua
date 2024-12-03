@@ -858,7 +858,7 @@ for _,v in pairs(workspace.NPCs.Hostile:GetChildren()) do
     createEspNPC(v)
 end
 
-return ESP_SETTINGS
-
 RunService.RenderStepped:Connect(updateEspNPC)
 RunService.RenderStepped:Connect(updateEsp)
+
+return ESP_SETTINGS
